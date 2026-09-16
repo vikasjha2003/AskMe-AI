@@ -219,4 +219,4 @@ __marimo__/
 
 # processed directories and files
 src/data/documents/processed_documents.json
-src\data\chroma_db
+src/data/chroma_db
