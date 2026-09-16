@@ -1,0 +1,190 @@
+{
+  "document": "Apple 2025 annual report.pdf",
+  "description": "Questions for Apple Inc. Form 10-K fiscal year 2025",
+  "questions": [
+    {
+      "id": "apple_factual_01",
+      "question": "What was Apple's total net sales for fiscal year 2025?",
+      "ground_truth": "Apple's total net sales for fiscal year 2025 was $416,161 million (or $416.161 billion).",
+      "category": "factual_lookup",
+      "source_page": 32,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_factual_02",
+      "question": "What was Apple's net income for fiscal year 2025?",
+      "ground_truth": "Apple's net income for fiscal year 2025 was $112,010 million (or $112.01 billion).",
+      "category": "factual_lookup",
+      "source_page": 32,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_factual_03",
+      "question": "What was Apple's diluted earnings per share for fiscal year 2025?",
+      "ground_truth": "Apple's diluted earnings per share for fiscal year 2025 was $7.46.",
+      "category": "factual_lookup",
+      "source_page": 32,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_factual_04",
+      "question": "How many full-time equivalent employees did Apple have as of September 27, 2025?",
+      "ground_truth": "Apple had approximately 166,000 full-time equivalent employees as of September 27, 2025.",
+      "category": "factual_lookup",
+      "source_page": 7,
+      "difficulty": "medium"
+    },
+    {
+      "id": "apple_factual_05",
+      "question": "What is Apple's headquarters address?",
+      "ground_truth": "Apple's headquarters is located at One Apple Park Way, Cupertino, California 95014.",
+      "category": "factual_lookup",
+      "source_page": 1,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_table_01",
+      "question": "What were Apple's iPhone net sales for fiscal year 2025?",
+      "ground_truth": "Apple's iPhone net sales for fiscal year 2025 was $209,586 million.",
+      "category": "table_query",
+      "source_page": 26,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_table_02",
+      "question": "What were Apple's Services net sales for fiscal year 2025?",
+      "ground_truth": "Apple's Services net sales for fiscal year 2025 was $109,158 million.",
+      "category": "table_query",
+      "source_page": 26,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_table_03",
+      "question": "What was Apple's net sales in the Americas region for fiscal year 2025?",
+      "ground_truth": "Apple's net sales in the Americas region for fiscal year 2025 was $178,353 million.",
+      "category": "table_query",
+      "source_page": 25,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_table_04",
+      "question": "What was Apple's net sales in Greater China for fiscal year 2025?",
+      "ground_truth": "Apple's net sales in Greater China for fiscal year 2025 was $64,377 million.",
+      "category": "table_query",
+      "source_page": 25,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_table_05",
+      "question": "What was Apple's gross margin for fiscal year 2025?",
+      "ground_truth": "Apple's gross margin for fiscal year 2025 was $195,201 million.",
+      "category": "table_query",
+      "source_page": 32,
+      "difficulty": "medium"
+    },
+    {
+      "id": "apple_table_06",
+      "question": "What was Apple's research and development expense for fiscal year 2025?",
+      "ground_truth": "Apple's research and development expense for fiscal year 2025 was $34,550 million.",
+      "category": "table_query",
+      "source_page": 32,
+      "difficulty": "medium"
+    },
+    {
+      "id": "apple_multihop_01",
+      "question": "How did Apple's total net sales change from fiscal year 2024 to fiscal year 2025?",
+      "ground_truth": "Apple's total net sales increased by 6% from $391,035 million in 2024 to $416,161 million in 2025, an increase of $25,126 million.",
+      "category": "multi_hop",
+      "source_page": 25,
+      "difficulty": "medium"
+    },
+    {
+      "id": "apple_multihop_02",
+      "question": "How did Apple's Services revenue growth compare to iPhone revenue growth in fiscal year 2025?",
+      "ground_truth": "Services revenue grew 14% (from $96,169M to $109,158M) while iPhone revenue grew only 4% (from $201,183M to $209,586M). Services significantly outpaced iPhone growth.",
+      "category": "multi_hop",
+      "source_page": 26,
+      "difficulty": "medium"
+    },
+    {
+      "id": "apple_multihop_03",
+      "question": "Which geographic region showed the strongest year-over-year growth for Apple in fiscal 2025?",
+      "ground_truth": "Japan showed the strongest year-over-year growth at 15%, growing from $25,052 million in 2024 to $28,703 million in 2025.",
+      "category": "multi_hop",
+      "source_page": 25,
+      "difficulty": "hard"
+    },
+    {
+      "id": "apple_multihop_04",
+      "question": "How did Apple's net income change from fiscal year 2024 to fiscal year 2025, and what was the percentage increase?",
+      "ground_truth": "Apple's net income increased from $93,736 million in 2024 to $112,010 million in 2025, an increase of $18,274 million or approximately 19.5%.",
+      "category": "multi_hop",
+      "source_page": 32,
+      "difficulty": "hard"
+    },
+    {
+      "id": "apple_summary_01",
+      "question": "What are Apple's main product categories?",
+      "ground_truth": "Apple's main product categories are iPhone, Mac, iPad, Wearables Home and Accessories, and Services.",
+      "category": "summarization",
+      "source_page": 26,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_summary_02",
+      "question": "What are Apple's reportable geographic segments?",
+      "ground_truth": "Apple's reportable geographic segments are Americas, Europe, Greater China, Japan, and Rest of Asia Pacific.",
+      "category": "summarization",
+      "source_page": 25,
+      "difficulty": "easy"
+    },
+    {
+      "id": "apple_summary_03",
+      "question": "What digital content and subscription services does Apple offer?",
+      "ground_truth": "Apple offers digital content through subscription services including Apple Arcade (game service), Apple Fitness+ (fitness service), Apple Music (music streaming), Apple News+ (news and magazine service), and Apple TV+ (original content and live sports).",
+      "category": "summarization",
+      "source_page": 5,
+      "difficulty": "medium"
+    },
+    {
+      "id": "apple_needle_01",
+      "question": "What was the EU Digital Markets Act fine imposed on Apple in April 2025?",
+      "ground_truth": "The European Commission fined Apple €500 million in the Article 5(4) Investigation related to how developers may communicate and promote offers to end users for apps distributed through the App Store.",
+      "category": "needle_in_haystack",
+      "source_page": 21,
+      "difficulty": "hard"
+    },
+    {
+      "id": "apple_needle_02",
+      "question": "What is Apple's par value per share of common stock?",
+      "ground_truth": "Apple's common stock has a par value of $0.00001 per share.",
+      "category": "needle_in_haystack",
+      "source_page": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": "apple_needle_03",
+      "question": "Which countries are mentioned as locations where a significant majority of Apple's manufacturing is performed?",
+      "ground_truth": "A significant majority of Apple's manufacturing is performed in whole or in part by outsourcing partners located primarily in China mainland, India, Japan, South Korea, Taiwan and Vietnam.",
+      "category": "needle_in_haystack",
+      "source_page": 9,
+      "difficulty": "hard"
+    },
+    {
+      "id": "apple_needle_04",
+      "question": "What was Apple's approximate aggregate market value of voting and non-voting stock held by non-affiliates as of March 28, 2025?",
+      "ground_truth": "The aggregate market value of voting and non-voting stock held by non-affiliates was approximately $3,253,431,000,000 (about $3.25 trillion) as of March 28, 2025.",
+      "category": "needle_in_haystack",
+      "source_page": 2,
+      "difficulty": "hard"
+    },
+    {
+      "id": "apple_needle_05",
+      "question": "What payment services does Apple offer?",
+      "ground_truth": "Apple offers payment services including Apple Card, a co-branded credit card, and Apple Pay, a cashless payment service.",
+      "category": "needle_in_haystack",
+      "source_page": 5,
+      "difficulty": "medium"
+    }
+  ]
+}
