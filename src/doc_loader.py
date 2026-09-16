@@ -26,7 +26,7 @@ def load_documents():
 
     # Parse PDFs using Docling
     loader = DoclingLoader(
-        file_path=[str(file) for file in FILE_PATH]
+        file_path=FILE_PATH
     )
 
     documents = loader.load()
