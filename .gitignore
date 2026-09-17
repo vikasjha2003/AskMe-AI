@@ -28,8 +28,7 @@ htmlcov/
 tempCodeRunnerFile.py
 
 # RAG generated data
-src/data/results/
-src/data/chroma_db/
+src/data
 
 # model
 models
