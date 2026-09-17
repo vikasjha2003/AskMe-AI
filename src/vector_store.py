@@ -14,6 +14,21 @@ CHROMA_DIR = Path("src/data/chroma_db")
 def create_vector_store(chunks):
     embeddings = get_embeddings()
 
+    for chunk in chunks:
+        doc_items = chunk.metadata.get("dl_meta", {}).get("doc_items", [])
+
+        pages = []
+
+        for item in doc_items:
+            for prov in item.get("prov", []):
+                page_no = prov.get("page_no")
+
+                if page_no is not None:
+                    pages.append(page_no)
+
+        if pages:
+            chunk.metadata["page_no"] = min(pages)
+
     chunks = filter_complex_metadata(chunks)
 
     vector_store = Chroma(
