@@ -1,84 +1,53 @@
 # AskMe AI
 
-AskMe AI is a Retrieval-Augmented Generation (RAG) project designed to answer questions from uploaded documents and benchmark how different chunking strategies affect retrieval quality and answer generation.
+AskMe AI is a document-grounded Retrieval-Augmented Generation (RAG) project for PDF-based question answering and retrieval benchmarking. It is built around a practical workflow: extract text from a PDF, split it into chunks, embed the chunks, store them in a vector database, retrieve relevant context for a question, and answer using a local LLM grounded in that context.
 
-The project is built around a real-world PDF document workflow and is optimized for experimentation: it supports multiple chunking methods, vector search, local LLM inference, and evaluation using a curated question-answer dataset.
+The repository is especially useful for experimenting with chunking strategies and evaluating how different chunk sizes and splitting methods affect retrieval quality on a real document.
 
-## Overview
+## What this project does
 
-AskMe AI enables users to:
-- upload or reference a PDF document
-- split the document using multiple chunking strategies
-- generate embeddings for each chunk
-- retrieve relevant context with vector similarity search
-- answer questions using a local language model grounded in retrieved context
-- benchmark retrieval performance against known questions and pages
+This project helps you:
 
-This makes the repository useful both as a document Q&A system and as a research tool for evaluating chunking effectiveness in RAG pipelines.
+- load and process a PDF document
+- generate multiple chunking variants of the same document
+- embed those chunks with SentenceTransformers
+- store them in Chroma for vector retrieval
+- ask questions grounded in document context
+- benchmark which chunking strategy performs best on a known QA set
+- generate evaluation metrics like Recall@5 and MRR@5
 
-## Why this project exists
+It is designed both as a working RAG example and as a small research sandbox for document Q&A evaluation.
 
-The core objective is to understand how document preprocessing and chunking affect downstream retrieval and answer quality.
+## Core idea
 
-In many RAG systems, chunking is one of the most important factors influencing:
-- retrieval precision
-- recall of relevant passages
-- overall answer quality
-- computational efficiency
+The key research question behind the project is:
 
-This project explores several chunking methods and compares them using evaluation metrics on a known document.
+- how do different chunking strategies influence retrieval and answer quality?
 
-## Features
+In many RAG pipelines, document chunking is a major determinant of both retrieval precision and downstream answer quality. AskMe AI lets you compare strategies like fixed-size chunking, recursive chunking, and token-aware chunking against the same corpus and evaluation questions.
 
-- PDF document ingestion using Docling
-- Multiple chunking strategies:
-  - fixed-size character chunking
-  - recursive chunking
-  - token-based chunking
-- Embeddings using Sentence Transformers
-- Vector database storage with Chroma
-- Semantic retrieval using MMR-based retriever
-- Local LLM-driven answer generation using llama.cpp
-- Benchmarking of chunking methods using Recall@5 and MRR@5
-- JSON-based QA evaluation dataset
-- CLI-based application flow for Q&A and benchmarking
+## Architecture overview
 
-## Architecture
+The project follows a standard RAG flow:
 
-The system follows a standard RAG pipeline:
+1. Load a PDF document with Docling
+2. Convert the document pages into LangChain `Document` objects
+3. Split the document using a selected chunking method
+4. Create embeddings from chunk text
+5. Store the chunks in ChromaDB
+6. Retrieve the most relevant chunks for a question
+7. Build a grounded prompt from the retrieved context
+8. Generate an answer with a local GGUF model
+9. Benchmark the retrieval pipeline using a JSON QA set
 
-1. Load document
-2. Convert pages/content into LangChain documents
-3. Chunk the document using a selected strategy
-4. Generate embeddings
-5. Store chunks in a vector store
-6. Retrieve relevant chunks for a question
-7. Pass retrieved context into an LLM
-8. Generate an answer grounded only in the supplied context
-9. Benchmark retrieval quality against known answers
-
-## Tech Stack
-
-- Python
-- LangChain
-- LangChain Text Splitters
-- LangChain Chroma
-- Hugging Face Embeddings
-- Sentence Transformers
-- ChromaDB
-- Docling
-- PyMuPDF / PDF processing tools
-- llama.cpp
-- Qwen-style local GGUF model
-- RAGAS-inspired evaluation approach
-- JSON-based QA dataset
-
-## Repository Structure
+## Project structure
 
 ```text
 AskMe-AI/
 ├── README.md
 ├── requirements.txt
+├── .python-version
+├── .gitignore
 ├── src/
 │   ├── __init__.py
 │   ├── main.py
@@ -101,57 +70,160 @@ AskMe-AI/
 │       └── results/
 ```
 
-## Document and QA Data
+## Module breakdown
 
-The repository includes:
-- a PDF source document: Apple 2025 annual report
-- a question-answer dataset in JSON format
-- benchmark output files written under `src/data/results`
+### `src/main.py`
 
-This makes the repo suitable for systematic comparison of retrieval methods and chunking strategies.
+Entry point for the interactive app. It presents a simple menu:
 
-## Chunking Methods
+- Ask Questions
+- Benchmark Document
 
-The project evaluates these chunking methods:
+This CLI lets a user select a document, choose a chunking strategy, and interactively query the document.
 
-- `fixed_256`
-- `fixed_512`
-- `fixed_1024`
-- `recursive`
-- `token_256`
-- `token_512`
-- `token_1024`
+### `src/doc_loader.py`
 
-These cover both fixed-size and token-aware chunking strategies, allowing comparison across different granularity levels.
+Loads a PDF using `langchain_docling.DoclingLoader` and caches the extracted content as a JSON file under `src/data/documents`. This avoids reprocessing the same file repeatedly.
 
-## Retrieval and Generation
+### `src/chunker.py`
 
-The retrieval layer uses Chroma with embeddings from `sentence-transformers/all-MiniLM-L6-v2`.
+Implements the document chunking strategies used in the project:
 
-The retriever is configured with:
+- fixed_256
+- fixed_512
+- fixed_1024
+- recursive
+- token_256
+- token_512
+- token_1024
+
+The project intentionally compares several fixed-size and token-aware chunk sizes so you can evaluate retrieval tradeoffs.
+
+### `src/embedding.py`
+
+Uses `langchain_huggingface.HuggingFaceEmbeddings` with the model:
+
+- `sentence-transformers/all-MiniLM-L6-v2`
+
+This provides embeddings for the chunks inserted into ChromaDB.
+
+### `src/vector_store.py`
+
+Creates and stores a Chroma collection for each document and chunking method. It also extracts page metadata so retrieved items can be linked back to source pages.
+
+### `src/retriever.py`
+
+Defines the retriever used during Q&A:
+
+- Chroma vector store
 - `search_type="mmr"`
-- `k` documents requested
-- `fetch_k` for candidate selection
+- `k=5`
+- `fetch_k=15`
 - `lambda_mult=0.75`
 
-This hybrid strategy balances relevance and diversity, which is useful when multiple related passages may appear in a document.
+MMR helps balance relevance and diversity when several related passages are retrieved.
 
-The answer generation layer builds a prompt using retrieved context and instructs the model to answer only from the provided document evidence.
+### `src/rag.py`
 
-## Evaluation
+Builds the final prompt for the LLM:
 
-The benchmark script evaluates retrieval effectiveness by measuring:
+- retrieves relevant chunks
+- concatenates them as context
+- prompts the model to answer only from the supplied evidence
+- instructs the model to respond with a fallback when the answer is not present
 
-- Recall@5
-- MRR@5
+### `src/local_llm.py`
 
-The evaluation compares retrieved chunks against the expected page of a question and computes:
-- percentage of questions finding the correct page within the top 5 results
-- mean reciprocal rank of the first correct result
+Loads a local GGUF model using `llama-cpp-python` and generates answers with a chat-completion call.
 
-This gives a practical signal for how well a given chunking configuration supports retrieval.
+The current configuration expects:
 
-## How to Run
+```text
+models/Qwen3-8B-Q4_K_M.gguf
+```
+
+### `src/benchmark.py`
+
+Runs evaluation over the built-in QA set. For each chunking method it:
+
+- creates a vector store
+- runs similarity search on each question
+- compares returned chunk page numbers with the expected source page
+- computes Recall@5 and MRR@5
+- saves benchmark output to `src/data/results`
+
+### `src/result_generator.py`
+
+Generates per-question answer outputs for each chunking method using the retriever and local generation prompt. This is useful for inspecting how the same question is answered across methods.
+
+## Data included in the repo
+
+The repository includes a practical document QA benchmark based on Apple's 2025 annual report.
+
+### Document
+
+```text
+src/data/documents/Apple 2025 annual report.pdf
+```
+
+### QA dataset
+
+```text
+src/data/questions_and_answers/apple_2025_annual_report.json
+```
+
+The dataset contains questions across several categories, including:
+
+- factual_lookup
+- table_query
+- multi_hop
+- summarization
+- needle_in_haystack
+
+Each question includes:
+
+- the question text
+- expected answer
+- source page number
+- difficulty label
+- category
+
+## Tech stack
+
+This repo uses the following stack:
+
+- Python
+- LangChain
+- LangChain Text Splitters
+- LangChain Chroma
+- Hugging Face embeddings
+- Sentence Transformers
+- ChromaDB
+- Docling
+- PyMuPDF / PDF extraction tooling
+- llama.cpp / llama-cpp-python
+- local GGUF model inference
+- JSON-based evaluation dataset
+
+## Requirements
+
+The project dependencies are defined in `requirements.txt`.
+
+Key packages include:
+
+- `langchain-docling`
+- `docling`
+- `langchain`
+- `langchain-text-splitters`
+- `langchain-huggingface`
+- `sentence-transformers`
+- `langchain-chroma`
+- `chromadb`
+- `ragas`
+- `datasets`
+- `llama-cpp-python`
+
+## Getting started
 
 ### 1. Clone the repository
 
@@ -160,11 +232,18 @@ git clone https://github.com/vikasjha2003/AskMe-AI.git
 cd AskMe-AI
 ```
 
-### 2. Create a virtual environment
+### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
 ### 3. Install dependencies
@@ -173,135 +252,153 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Download a local model
+### 4. Download the local model
 
-The project expects a GGUF model file at:
+This project expects a GGUF model file at:
 
 ```text
 models/Qwen3-8B-Q4_K_M.gguf
 ```
 
-Place the model in a `models/` directory before running the local LLM workflow.
+Create a `models/` directory and place the model there before running the LLM workflow.
 
-### 5. Run the app
+## Running the app
 
 ```bash
 python src/main.py
 ```
 
-You will see a menu with:
-- Ask Questions
-- Benchmark Document
+You will see a menu:
 
-## Usage Modes
-
-### A. Ask Questions
-
-This mode lets you:
-- enter a document path
-- choose a chunking method
-- build a vector store
-- ask questions interactively
-
-Example workflow:
-```bash
-python src/main.py
-```
-
-Then choose:
 ```text
 1. Ask Questions
-```
-
-### B. Benchmark Document
-
-This mode lets you:
-- provide a PDF document
-- provide a QA JSON file
-- run retrieval benchmarking across chunking methods
-- generate result files for comparison
-
-Example:
-```bash
-python src/main.py
-```
-
-Then choose:
-```text
 2. Benchmark Document
 ```
 
-## Example Benchmark Flow
+### Ask Questions mode
 
-The system uses a QA file like:
+This mode lets you:
 
-```text
-src/data/questions_and_answers/apple_2025_annual_report.json
+- enter a document path
+- choose a chunking strategy
+- create a vector store for that method
+- ask questions interactively
+
+Example flow:
+
+```bash
+python src/main.py
 ```
 
-This JSON dataset contains questions, answers, categories, source pages, and difficulty labels. The benchmark script loads these, retrieves documents for each question, and compares the retrieved page numbers to the expected answer source page.
+Then select:
 
-## Output Artifacts
+```text
+1
+```
 
-The project saves benchmark outputs in:
+### Benchmark Document mode
+
+This mode lets you:
+
+- provide a PDF document
+- provide a QA JSON file
+- benchmark all chunking methods
+- save summary metrics and answer outputs
+
+Example flow:
+
+```bash
+python src/main.py
+```
+
+Then select:
+
+```text
+2
+```
+
+## Evaluation metrics
+
+The benchmark measures retrieval quality using:
+
+- Recall@5
+- MRR@5
+
+These metrics compare retrieved document pages against the document page referenced by each QA item. This allows the project to rank different chunking strategies quantitatively.
+
+## Output artifacts
+
+Benchmark and answer outputs are saved in:
 
 ```text
 src/data/results/
 ```
 
-Typical output includes:
-- per-document benchmark summaries
-- per-method evaluation metrics
-- generated answer results for each chunking strategy
+Typical generated outputs include:
 
-## Current Project Strengths
+- benchmark summaries
+- per-method metrics
+- generated answers for each question
+- retrieved page metadata
 
-- clear RAG pipeline structure
-- multiple benchmarking modes
-- strong focus on chunking strategy comparison
-- practical document QA workflow
-- modular design with separate concerns for loading, chunking, embedding, retrieval, and generation
+## Why this repo is useful
 
-## Potential Improvements
+This repository is a strong example of a minimal but complete RAG training/evaluation project because it demonstrates:
 
-The repository is already solid for experimentation, but here are some natural next improvements:
+- PDF ingestion
+- chunking experimentation
+- embedding generation
+- vector search
+- local LLM inference
+- retrieval benchmarking
+- document-grounded answer generation
 
-- add a proper CLI interface with argparse
-- add model configuration via environment variables
-- add automated benchmark reporting
-- add evaluation for answer correctness besides retrieval metrics
-- support multi-document ingestion
-- improve caching and persistence handling
-- add Docker support
-- add CI tests for unit-level validation
-- add a Streamlit or Gradio interface for easier usage
+It is particularly valuable if you want to study how chunking choices affect retrieval performance on a real-world financial document.
+
+## Current strengths
+
+- straightforward RAG architecture
+- multiple chunking strategies built in
+- QA benchmark dataset included
+- real PDF-based workflow
+- modular code organization
+- practical local-model inference path
+
+## Notable limitations and opportunities
+
+The repo is intentionally lightweight and research-oriented. Some natural next improvements include:
+
+- environment-variable-based configuration
+- better CLI argument support with `argparse`
+- more complete logging and error handling
+- a web UI using Streamlit or Gradio
+- support for multi-document ingestion
+- answer-quality metrics beyond retrieval metrics
+- automated testing
+- Docker support
+- persistent model/cache configuration
 
 ## License
 
-This project currently does not include an explicit license file. If you plan to publish or share it publicly, add a license such as MIT or Apache-2.0.
+This repository does not currently include a `LICENSE` file. If you plan to distribute or publish the project, consider adding an explicit OSS license such as MIT or Apache-2.0.
 
 ## Contributing
 
-Contributions are welcome. Potential areas include:
+Contributions are welcome in areas such as:
 
-- improving chunking strategies
-- benchmarking additional retrieval methods
-- adding support for more document types
-- integrating more robust evaluation metrics
-- improving model configuration and deployment
+- better chunking methods
+- improved benchmark reporting
+- support for more PDF or document ingestion types
+- answer evaluation beyond page retrieval
+- cleaner configuration and deployment patterns
 
-## Project Summary
+## Summary
 
-AskMe AI is a practical and research-oriented document Q&A system built to evaluate how chunking and retrieval design affect a RAG pipeline. It is especially relevant for PDF-based document understanding, research experiments, and document intelligence workflows.
+AskMe AI is a compact but practical RAG project for document-based question answering and benchmarking. It combines PDF extraction, chunking, embeddings, vector search, retrieval, and local LLM generation, making it a useful project for understanding how retrieval components influence end-to-end question answering quality.
 
-The project demonstrates a complete end-to-end RAG architecture using:
-- document preprocessing
-- vector search
-- local language models
-- evaluation metrics
-- experimental benchmarking
+If your goal is to experiment with chunk sizes, compare retrieval methods, or build a document-grounded local QA pipeline, this repository provides a strong foundation.
 
-## Quick Start
+## Quick start
 
 ```bash
 git clone https://github.com/vikasjha2003/AskMe-AI.git
@@ -312,4 +409,4 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-If you want to take this project further, consider adding a web UI, automated benchmarking dashboard, or a more robust evaluation layer for answer quality.
+If you want to benchmark the included Apple annual report dataset, run the benchmark flow from the app menu and provide the included PDF and QA JSON file.
