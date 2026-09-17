@@ -39,3 +39,6 @@ tiktoken>=0.7.0
 
 # Logging
 structlog>=24.0.0
+
+# Local Model
+llama-cpp-python
