@@ -1,58 +1,15 @@
 import json
 from pathlib import Path
 
-from langchain_chroma import Chroma
-from langchain_community.vectorstores.utils import filter_complex_metadata
-
-from embedding import get_embeddings
+from vector_store import create_vector_store
 from chunker import create_chunks
 from doc_loader import load_documents
+from config import QA_FILE, RESULTS_DIR
 
 
-CHROMA_DIR = Path("src/data/chroma_db")
-QA_FILE = Path("src/data/questions_and_answers/apple_2025_annual_report.json")
-
-
-def load_questions():
-    with open(QA_FILE, "r", encoding="utf-8") as f:
+def load_questions(qa_file):
+    with open(qa_file, "r", encoding="utf-8") as f:
         return json.load(f)["questions"]
-
-
-def prepare_metadata(chunks):
-    for chunk in chunks:
-        doc_items = chunk.metadata.get("dl_meta", {}).get("doc_items", [])
-
-        pages = []
-
-        for item in doc_items:
-            for prov in item.get("prov", []):
-                page_no = prov.get("page_no")
-
-                if page_no is not None:
-                    pages.append(page_no)
-
-        if pages:
-            chunk.metadata["page_no"] = min(pages)
-
-    return filter_complex_metadata(chunks)
-
-
-def create_vector_store(chunks, method_name):
-    embeddings = get_embeddings()
-
-    chunks = prepare_metadata(chunks)
-
-    collection_name = f"askme_ai_{method_name}"
-
-    vector_store = Chroma(
-        collection_name=collection_name,
-        embedding_function=embeddings,
-        persist_directory=str(CHROMA_DIR),
-    )
-
-    vector_store.add_documents(chunks)
-
-    return vector_store
 
 
 def evaluate_vector_store(vector_store, questions, k=5):
@@ -62,10 +19,11 @@ def evaluate_vector_store(vector_store, questions, k=5):
     for question in questions:
         results = vector_store.similarity_search(
             question["question"],
-            k=k
+            k=k,
         )
 
         target_page = question["source_page"]
+
         rank = None
 
         for i, doc in enumerate(results, start=1):
@@ -85,27 +43,39 @@ def evaluate_vector_store(vector_store, questions, k=5):
     return recall, mrr
 
 
-def main():
-    documents = load_documents()
-    questions = load_questions()
+def run_benchmark(document_path, qa_file=QA_FILE):
+    document_path = Path(document_path)
 
+    document_id = (
+        document_path.stem.lower().replace(" ", "_")
+    )
+
+    print("\nLoading document...")
+    documents = load_documents(document_path)
+
+    print("Loading questions...")
+    questions = load_questions(qa_file)
+
+    print("Creating chunks...")
     chunks_by_method = create_chunks(documents)
 
     results = {}
 
     for method_name, chunks in chunks_by_method.items():
+
         print(f"\nEvaluating: {method_name}")
         print(f"Chunks: {len(chunks)}")
 
         vector_store = create_vector_store(
             chunks,
-            method_name
+            method_name=method_name,
+            document_id=document_id,
         )
 
         recall, mrr = evaluate_vector_store(
             vector_store,
             questions,
-            k=5
+            k=5,
         )
 
         results[method_name] = {
@@ -115,18 +85,35 @@ def main():
         }
 
         print(f"Recall@5: {recall:.4f}")
-        print(f"MRR@5: {mrr:.4f}")
+        print(f"MRR@5:    {mrr:.4f}")
 
-    print("\n========== BENCHMARK RESULTS ==========")
+    RESULTS_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    for method, result in results.items():
-        print(
-            f"{method:12} | "
-            f"Chunks: {result['chunks']:4} | "
-            f"Recall@5: {result['recall@5']:.4f} | "
-            f"MRR@5: {result['mrr@5']:.4f}"
+    output_file = (
+        RESULTS_DIR / f"{document_id}_benchmark_results.json"
+    )
+
+    with open(
+        output_file,
+        "w",
+        encoding="utf-8",
+    ) as f:
+        json.dump(
+            results,
+            f,
+            indent=2,
         )
+
+    print(f"\nBenchmark results saved to:")
+    print(output_file)
+
+    return results, output_file
 
 
 if __name__ == "__main__":
-    main()
+    run_benchmark(
+        document_path="src/data/documents/Apple 2025 annual report.pdf"
+    )

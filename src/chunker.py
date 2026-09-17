@@ -3,8 +3,6 @@ from langchain_text_splitters import (
     TokenTextSplitter,
 )
 
-from doc_loader import load_documents
-
 
 def fixed_chunking(documents, chunk_size, chunk_overlap=50):
     splitter = RecursiveCharacterTextSplitter(
@@ -67,27 +65,3 @@ def create_chunks(documents, selected_methods=None):
         results[method_name] = methods[method_name](documents)
 
     return results
-
-
-if __name__ == "__main__":
-    documents = load_documents()
-
-    chunks = create_chunks(documents)
-
-    for method, method_chunks in chunks.items():
-        print(f"{method}: {len(method_chunks)} chunks")
-
-    selected_methods = [
-        "fixed_256",
-        "recursive",
-    ]
-
-    selected_chunks = create_chunks(
-        documents,
-        selected_methods=selected_methods
-    )
-
-    print("\nSelected methods:")
-
-    for method, method_chunks in selected_chunks.items():
-        print(f"{method}: {len(method_chunks)} chunks")
