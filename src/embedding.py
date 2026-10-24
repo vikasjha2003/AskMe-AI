@@ -1,7 +1,7 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 
 
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+MODEL_NAME = "BAAI/bge-small-en-v1.5"
 
 
 def get_embeddings():
