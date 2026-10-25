@@ -1,6 +1,6 @@
 # AskMe AI
 
-AskMe AI is a document-grounded Retrieval-Augmented Generation (RAG) project for PDF-based question answering and retrieval benchmarking. It is built around a practical workflow: extract text from a PDF, split it into chunks, embed the chunks, store them in a vector database, retrieve relevant context for a question, and answer using a local LLM grounded in that context.
+AskMe AI is a document-grounded Retrieval-Augmented Generation (RAG) project for PDF-based question answering and retrieval benchmarking. It is built around a practical workflow: extract text from a document, generate multiple chunking variants, embed and index them, then evaluate retrieval quality with a small benchmark.
 
 The repository is especially useful for experimenting with chunking strategies and evaluating how different chunk sizes and splitting methods affect retrieval quality on a real document.
 
@@ -24,7 +24,7 @@ The key research question behind the project is:
 
 - how do different chunking strategies influence retrieval and answer quality?
 
-In many RAG pipelines, document chunking is a major determinant of both retrieval precision and downstream answer quality. AskMe AI lets you compare strategies like fixed-size chunking, recursive chunking, and token-aware chunking against the same corpus and evaluation questions.
+In many RAG pipelines, document chunking is a major determinant of both retrieval precision and downstream answer quality. AskMe AI lets you compare strategies like fixed-size chunking, recursive splitting, and token-based chunking across a real document benchmark.
 
 ## Architecture overview
 
@@ -89,13 +89,13 @@ Loads a PDF using `langchain_docling.DoclingLoader` and caches the extracted con
 
 Implements the document chunking strategies used in the project:
 
-- fixed_256
-- fixed_512
-- fixed_1024
+- fixed_200
+- fixed_400
+- fixed_800
 - recursive
-- token_256
-- token_512
-- token_1024
+- token_100
+- token_200
+- token_400
 
 The project intentionally compares several fixed-size and token-aware chunk sizes so you can evaluate retrieval tradeoffs.
 
@@ -204,6 +204,7 @@ This repo uses the following stack:
 - llama.cpp / llama-cpp-python
 - local GGUF model inference
 - JSON-based evaluation dataset
+- Google Generative AI tooling (available in the project dependencies)
 
 ## Requirements
 
@@ -222,6 +223,8 @@ Key packages include:
 - `ragas`
 - `datasets`
 - `llama-cpp-python`
+- `langchain-google-genai`
+- `google-generativeai`
 
 ## Getting started
 
@@ -394,7 +397,7 @@ Contributions are welcome in areas such as:
 
 ## Summary
 
-AskMe AI is a compact but practical RAG project for document-based question answering and benchmarking. It combines PDF extraction, chunking, embeddings, vector search, retrieval, and local LLM generation, making it a useful project for understanding how retrieval components influence end-to-end question answering quality.
+AskMe AI is a compact but practical RAG project for document-based question answering and benchmarking. It combines PDF extraction, chunking, embeddings, vector search, retrieval, and local LLM generation to help evaluate how different chunking strategies affect answer quality.
 
 If your goal is to experiment with chunk sizes, compare retrieval methods, or build a document-grounded local QA pipeline, this repository provides a strong foundation.
 
