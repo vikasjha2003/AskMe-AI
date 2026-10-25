@@ -14,7 +14,7 @@ def fixed_chunking(documents, chunk_size, chunk_overlap):
     return splitter.split_documents(documents)
 
 
-def recursive_chunking(documents, chunk_size=400, chunk_overlap=40):
+def recursive_chunking(documents, chunk_size=800, chunk_overlap=160):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
@@ -35,13 +35,13 @@ def token_chunking(documents, chunk_size, chunk_overlap):
 
 def get_chunking_methods():
     return {
-        "fixed_256": lambda docs: fixed_chunking(docs,100,10),
-        "fixed_512": lambda docs: fixed_chunking(docs,200,20),
-        "fixed_1024": lambda docs: fixed_chunking(docs,400,40),
+        "fixed_200": lambda docs: fixed_chunking(docs,200,40),
+        "fixed_400": lambda docs: fixed_chunking(docs,400,80),
+        "fixed_800": lambda docs: fixed_chunking(docs,800,160),
         "recursive": lambda docs: recursive_chunking(docs),
-        "token_256": lambda docs: token_chunking(docs,100,10),
-        "token_512": lambda docs: token_chunking(docs,200,20),
-        "token_1024": lambda docs: token_chunking(docs,400,40),
+        "token_100": lambda docs: token_chunking(docs,100,20),
+        "token_200": lambda docs: token_chunking(docs,200,40),
+        "token_400": lambda docs: token_chunking(docs,400,80),
     }
 
 

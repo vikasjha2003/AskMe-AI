@@ -2,12 +2,7 @@ from retriever import get_retriever
 from local_llm import generate
 
 
-def answer_question(
-    question,
-    method_name="recursive",
-    document_id="default",
-    k=5,
-):
+def answer_question(question, method_name="recursive", document_id="default", k=5) :
     retriever = get_retriever(
         method_name=method_name,
         document_id=document_id,

@@ -1,13 +1,13 @@
 from pathlib import Path
 
 CHUNKING_METHODS = [
-    "fixed_256",
-    "fixed_512",
-    "fixed_1024",
+    "fixed_200",
+    "fixed_400",
+    "fixed_800",
     "recursive",
-    "token_256",
-    "token_512",
-    "token_1024",
+    "token_100",
+    "token_200",
+    "token_400",
 ]
 
 CHROMA_DIR = Path("src/data/chroma_db")
